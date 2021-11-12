@@ -3,6 +3,7 @@ package com.scienceman;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -45,5 +46,11 @@ public class SQLConnector {
 	
 	public static void update(String q) throws SQLException {
 		stmt.executeUpdate(q);
+	}
+	
+	public static ResultSet preparedSelect(String q, String condition) throws SQLException {
+		PreparedStatement pStmt = sqlConnection.prepareStatement(q);
+		pStmt.setString(1, condition);
+		return pStmt.executeQuery();
 	}
 }

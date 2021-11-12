@@ -1,6 +1,7 @@
 package com.scienceman;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -32,16 +33,31 @@ public class Bot {
 		// Connects to MySQL database and creates necessary tables
 		SQLConnector.connect();
 		try {
-			SQLConnector.update("CREATE TABLE IF NOT EXISTS `testbot`.`guilds`"
-					+ "(`id` BIGINT UNSIGNED NOT NULL,"
+			SQLConnector.update("CREATE TABLE IF NOT EXISTS `guilds`"
+					+ "(`guildId` BIGINT UNSIGNED NOT NULL,"
 					+ " `prefix` VARCHAR(1) NULL,"
 					+ "`channel` BIGINT UNSIGNED NULL,"
-					+ "PRIMARY KEY (`id`),"
+					+ "PRIMARY KEY (`guildId`),"
 					+ "UNIQUE INDEX `id_UNIQUE`"
-					+ "(`id` ASC) VISIBLE)"
+					+ "(`guildId` ASC) VISIBLE)"
+					+ "DEFAULT CHARACTER SET = utf8;");
+			SQLConnector.update("CREATE TABLE IF NOT EXISTS `channels`"
+					+ "(`channelId` VARCHAR(45) NOT NULL,"
+					+ "`playlistId` VARCHAR(45) NULL,"
+					+ "PRIMARY KEY (`channelId`),"
+					+ "UNIQUE INDEX `channelId_UNIQUE`"
+					+ "(`channelId` ASC) VISIBLE)"
 					+ "DEFAULT CHARACTER SET = utf8;");
 		} catch (SQLException e) {
 			JDAImpl.LOG.error("Unable to access or create necessary tables in MySQL database.", e);
+			System.exit(1);
+		}
+		
+		// Sets up YouTube API
+		try {
+			YouTubeConnector.setup("testbot", apiKeys.getProperty("youtube-data.key"));
+		} catch (GeneralSecurityException | IOException e) {
+			JDAImpl.LOG.error("Unable to connect to the YouTube Data API v3", e);
 			System.exit(1);
 		}
 		
